@@ -98,6 +98,7 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
 
                     if(validNewText()){
                         readFile(ProcessFile)
+                        currentFile = null;
                     }else{
                         alert("Insira um texto para substituir na coluna 120");
                     }
@@ -109,14 +110,19 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
             }
 
             function handleFile(files){
+                let msg = ""
                 if(files[0]){
-                    currentFile = files[0];
-                    alert("<b>" + files[0].name + "</b> Carregado com sucesso");
+                    if( files[0].name.indexOf("txt") == -1  ){
+                        msg = "O sistema suporta apenas arquivos de texto";
+                    }else{
+                        currentFile = files[0];
+                        msg = "Arquivo <b>" + files[0].name + "</b> carregado com sucesso";
+                    }
                 }else{
                     currentFile = null;
-                    alert("Não foi possivel carregar nenhum arquivo");
+                    msg = "Não foi possivel carregar nenhum arquivo";
                 }
-                
+                alert(msg);
                 
             }
 
