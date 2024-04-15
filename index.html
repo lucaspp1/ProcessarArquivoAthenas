@@ -181,11 +181,13 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
 
                 const separateLines = textToProcess.split(/\r?\n|\r|\n/g);
                 const newLines = proccessAllLines(separateLines);
+                
+                let fileName = currentFile.name.replace(".txt", "_processado.txt")
+                if(fileName.indexOf("_processado") == -1){
+                    fileName = fileName.replace(".TXT", "_processado.TXT");
+                }
 
-                 // console.log({lista: newLines})
-
-                // console.log({final: newLines.join("\r\n")})
-                download("processado_"+currentFile.name, newLines.join("\r\n") );
+                download(fileName, newLines.join("\r\n") );
             }
 
             function download(filename, text) {
