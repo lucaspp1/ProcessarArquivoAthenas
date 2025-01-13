@@ -51,7 +51,7 @@
               <div class="row center">
                 
                 <div class="input-field col s12 m8 offset-m2 l6 offset-l3">
-                    <input onchange="validNewText()" placeholder="texto para substituir na coluna 120" id="newText" type="text" >
+                    <input onchange="validNewText()" value="VENDAS C/CARTOES / PIX / CDF" placeholder="texto para substituir na coluna 120" id="newText" type="text" >
                     <label for="first_name">Novo texto</label>
                 </div>
 
@@ -72,6 +72,7 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
         </script>
 
         <script>
+            const delay = ms => new Promise(res => setTimeout(res, ms));
             var currentFile = null;
             const colToChange = 120;
 
@@ -188,6 +189,7 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
                 }
 
                 download(fileName, newLines.join("\r\n") );
+                reloadPage(3);
             }
 
             function download(filename, text) {
@@ -203,6 +205,11 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
                 document.body.removeChild(element);
                 alert("Arquivo gerado")
             }
+
+            async function reloadPage(seconds) {
+                await delay(seconds * 1000);
+                window.location.reload();
+            };
         </script>
     </body>
 </html>
