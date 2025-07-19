@@ -149,10 +149,38 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
                 return possiblesoptions.indexOf(char) != -1
             }
 
+            function isPixCode(text) {
+                // Primeiro, remove todas as aspas da string
+                const cleanedText = text.replace(/['"]/g, '').trim();
+
+                // Regex para validar um UUID (chave aleatória do Pix)
+                // ^ indica o início da string
+                // [0-9a-fA-F]{8} - 8 dígitos hexadecimais (0-9, a-f, A-F)
+                // - - um hífen literal
+                // [0-9a-fA-F]{4} - 4 dígitos hexadecimais
+                // - - um hífen literal
+                // [0-9a-fA-F]{4} - 4 dígitos hexadecimais
+                // - - um hífen literal
+                // [0-9a-fA-F]{4} - 4 dígitos hexadecimais
+                // - - um hífen literal
+                // [0-9a-fA-F]{12} - 12 dígitos hexadecimais
+                // $ indica o fim da string
+                // i - flag para ignorar case (maiúsculas/minúsculas)
+                const pixCodeRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/i;
+                return pixCodeRegex.test(cleanedText);
+            }
+
             function verifyColumnToChange(text){
                 let isOKay = true
+                const textIsPixCode = isPixCode(text);
+                
+                if( isPixCode(text) ){
+                    return true;
+                }
+                
                 for(let char in text){
-                    if( text[char] != '.' && text[char] != ' ' && (!isDigit(text[char])) ) isOKay = false
+                    // if( (!isPixCode(text)) || (text[char] != '.' && text[char] != ' ' && (!isDigit(text[char])))  ) isOKay = false
+                    if( (text[char] != '.' && text[char] != ' ' && (!isDigit(text[char])))  ) isOKay = false
                 }
 
                 return isOKay
@@ -208,7 +236,7 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
 
             async function reloadPage(seconds) {
                 await delay(seconds * 1000);
-                window.location.reload();
+                // window.location.reload();
             };
         </script>
     </body>
