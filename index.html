@@ -59,7 +59,7 @@
 
               <div class="row center">
                 <button onclick="carregarArquivo()" id="download-button" class="btn-large waves-effect waves-light blue-grey darken-4">Carregar arquivo</button>
-                <input type="file" id="arquivo" onChange="handleFile(this.files)" style="display: none;" >
+                <input type="file" id="arquivo" accept=".txt" onChange="handleFile(this.files)" style="display: none;" multiple>
                 <button id="download-button" onclick="processarArquivo()" class="btn-large waves-effect waves-light indigo ">Processar Arquivo</button>
               </div>
               <br><br>
@@ -73,7 +73,7 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
 
         <script>
             const delay = ms => new Promise(res => setTimeout(res, ms));
-            var currentFile = null;
+            var currentFiles = [];
             const colToChange = 120;
 
             function validNewText(){
@@ -92,13 +92,28 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
                 M.toast({html: toastHTML, classes: 'rounded'});
             }
 
-            function processarArquivo(){
-                if(currentFile == null){
+            async function processarArquivo(){
+                if(currentFiles == null || currentFiles.length == 0){
                     alert("Selecione um arquivo");
                 }else{
 
                     if(validNewText()){
-                        readFile(ProcessFile)
+
+                        for (let i = 0; i < currentFiles.length; i++) {
+                            const file = currentFiles[i];
+                            await new Promise((resolve) => {
+                                readFile(file, (data, f) => {
+                                    ProcessFile(f, data);
+                                    resolve();
+                                });
+                            });
+                            // pequeno intervalo entre downloads para o navegador não bloquear
+                            await delay(500);
+                        }
+
+                        alert(currentFiles.length + " arquivo(s) processado(s)");
+                        reloadPage(3);
+
                     }else{
                         alert("Insira um texto para substituir na coluna 120");
                     }
@@ -110,30 +125,36 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
             }
 
             function handleFile(files){
-                let msg = ""
-                if(files[0]){
-                    if( files[0].name.indexOf("txt") == -1  ){
-                        msg = "O sistema suporta apenas arquivos de texto";
+                currentFiles = [];
+                let invalidCount = 0;
+
+                for (let i = 0; i < files.length; i++) {
+                    if( files[i].name.indexOf("txt") == -1 ){
+                        invalidCount++;
                     }else{
-                        currentFile = files[0];
-                        msg = "Arquivo <b>" + files[0].name + "</b> carregado com sucesso";
+                        currentFiles.push(files[i]);
                     }
+                }
+
+                let msg = "";
+                if(currentFiles.length > 0){
+                    msg = currentFiles.length + " arquivo(s) carregado(s) com sucesso";
+                    if(invalidCount > 0) msg += " — " + invalidCount + " ignorado(s) (não é .txt)";
                 }else{
-                    currentFile = null;
                     msg = "Não foi possivel carregar nenhum arquivo";
                 }
                 alert(msg);
                 
             }
 
-            function readFile(functionAfterRead){
+            function readFile(file, functionAfterRead){
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     let data = event.target.result;
-                    functionAfterRead(data)
+                    functionAfterRead(data, file)
                     // console.log(data);
                 };
-                reader.readAsText(currentFile);
+                reader.readAsText(file);
             }
             
             function addEmptySpaces(spaces){
@@ -206,18 +227,17 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
                 return newLines;
             }
             
-            function ProcessFile(textToProcess){
+            function ProcessFile(file, textToProcess){
 
                 const separateLines = textToProcess.split(/\r?\n|\r|\n/g);
                 const newLines = proccessAllLines(separateLines);
                 
-                let fileName = currentFile.name.replace(".txt", "_processado.txt")
+                let fileName = file.name.replace(".txt", "_processado.txt")
                 if(fileName.indexOf("_processado") == -1){
                     fileName = fileName.replace(".TXT", "_processado.TXT");
                 }
 
                 download(fileName, newLines.join("\r\n") );
-                reloadPage(3);
             }
 
             function download(filename, text) {
@@ -231,7 +251,6 @@ var _get=function t(e,i,n){null===e&&(e=Function.prototype);var s=Object.getOwnP
                 element.click();
 
                 document.body.removeChild(element);
-                alert("Arquivo gerado")
             }
 
             async function reloadPage(seconds) {
